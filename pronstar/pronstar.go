@@ -32,7 +32,7 @@ func init() {
 
 var GirlHome = &Spider{
 	Name:        "pronstar",
-	Description: "pronstar [http://www.pronhub.com/]",
+	Description: "pronstar [http://www.pornhub.com/]",
 	//	Pausetime:    2000,
 	Keyin:        KEYIN,
 	Limit:        LIMIT,
@@ -40,7 +40,7 @@ var GirlHome = &Spider{
 	RuleTree: &RuleTree{
 		Root: func(ctx *Context) {
 			ctx.AddQueue(&request.Request{
-				Url:    "https://www.pronhub.com",
+				Url:    "https://www.pornhub.com",
 				Method: "GET",
 				Rule:   "首页",
 			})
@@ -58,7 +58,7 @@ var GirlHome = &Spider{
 					//					fmt.Println("首页：redirect=" + redirect + "&token=" + token + "&remember_me=" + remember_me + "&from=" + from)
 
 					ctx.AddQueue(&request.Request{
-						Url:      "https://www.pronhub.com/login",
+						Url:      "https://www.pornhub.com/login",
 						Method:   "POST",
 						PostData: "redirect=" + redirect + "&token=" + token + "&remember_me=" + remember_me + "&from=" + from + "&username=kenzhao&password=a123456",
 						Rule:     "登录",
@@ -78,7 +78,7 @@ var GirlHome = &Spider{
 					//					fmt.Println("登陆login：redirect=" + redirect + "&token=" + token + "&remember_me=" + remember_me + "&from=" + from)
 
 					ctx.AddQueue(&request.Request{
-						Url:      "https://www.pronhub.com/front/authenticate",
+						Url:      "https://www.pornhub.com/front/authenticate",
 						Header:   http.Header{"Content-Type": []string{"application/x-www-form-urlencoded; charset=UTF-8"}},
 						Method:   "POST",
 						PostData: "redirect=" + redirect + "&token=" + token + "&remember_me=" + remember_me + "&from=" + from + "&username=kenzhao&password=a123456",
@@ -98,10 +98,10 @@ var GirlHome = &Spider{
 					}
 					searchStr := params[2]
 
-					//							Url:  "https://www.pronhub.com/" + searchStr + "&page=" + strconv.Itoa(i),
+					//							Url:  "https://www.pornhub.com/" + searchStr + "&page=" + strconv.Itoa(i),
 					for i := startIndex; i <= endIndex; i++ {
 						ctx.AddQueue(&request.Request{
-							Url:  "https://www.pronhub.com/" + searchStr,
+							Url:  "https://www.pornhub.com/" + searchStr,
 							Rule: "home页面",
 						})
 					}
@@ -207,7 +207,7 @@ var GirlHome = &Spider{
 							title := videoInfo.Text()
 
 							ctx.AddQueue(&request.Request{
-								Url:    "https://www.pronhub.com" + openUrl,
+								Url:    "https://www.pornhub.com" + openUrl,
 								Header: http.Header{"Content-Type": []string{"application/x-www-form-urlencoded; charset=UTF-8"}},
 								Temp:   map[string]interface{}{"title": title, "valid": valid, "viewsNum": viewsNum},
 								Rule:   "获取明细",

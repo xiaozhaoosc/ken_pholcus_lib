@@ -34,7 +34,7 @@ func init() {
 
 var GirlHome = &Spider{
 	Name:         "pron",
-	Description:  "pron [http://www.pronhub.com/]",
+	Description:  "pron [http://www.pornhub.com/]",
 	Pausetime:    2000,
 	Keyin:        KEYIN,
 	Limit:        LIMIT,
@@ -44,7 +44,7 @@ var GirlHome = &Spider{
 			cookie := strings.Trim(ctx.GetKeyin(), " ")
 			fmt.Println([]string{cookie})
 			ctx.AddQueue(&request.Request{
-				Url:    "https://www.pronhub.com/",
+				Url:    "https://www.pornhub.com/",
 				Header: http.Header{"Cookie": []string{cookie}},
 				Rule:   "登录后",
 			})
@@ -55,7 +55,7 @@ var GirlHome = &Spider{
 					cookie := strings.Trim(ctx.GetKeyin(), " ")
 					for i := 1; i < 2; i++ {
 						ctx.AddQueue(&request.Request{
-							Url:    "https://www.pronhub.com/view_video.php?viewkey=ph58fb80e3bbc91",
+							Url:    "https://www.pornhub.com/view_video.php?viewkey=ph58fb80e3bbc91",
 							Header: http.Header{"Cookie": []string{cookie}},
 							Rule:   "获取明细",
 						})
