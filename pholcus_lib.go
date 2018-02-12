@@ -7,4 +7,6 @@ import (
 	_ "github.com/xiaozhaoosc/ken_pholcus_lib/pronstar"
 	_ "github.com/xiaozhaoosc/ken_pholcus_lib/pinterest"
 	_ "github.com/xiaozhaoosc/ken_pholcus_lib/tumblr"
+	_ "github.com/xiaozhaoosc/ken_pholcus_lib/mulittumblr"
+	_ "github.com/xiaozhaoosc/ken_pholcus_lib/tumblrvideo"
 )

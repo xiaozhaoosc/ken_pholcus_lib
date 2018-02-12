@@ -1,10 +1,10 @@
-package pholcus_lib
+package mulittumblr
+
 
 // 基础包
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 	//	"math"
 
 	"github.com/henrylee2cn/pholcus/app/downloader/request" //必需
@@ -74,19 +74,19 @@ type dataObj struct {
 }
 
 var GirlHome = &Spider{
-	Name:        "tumblr API",
-	Description: "tumblr API [https://www.tumblr.com/]",
+	Name:        "mulit tumblr API",
+	Description: "mulit tumblr API [https://www.tumblr.com/]",
 	//	Pausetime:    2000,
 	Keyin:        KEYIN,
 	Limit:        LIMIT,
 	EnableCookie: true,
 	RuleTree: &RuleTree{
 		Root: func(ctx *Context) {
-			var paramsStr = ctx.GetKeyin()
+			var paramsStr= ctx.GetKeyin()
 			params := strings.Split(paramsStr, "@")
-			for i := 0; i <= len(params)-1-2 ; i++ {
+			for i := 0; i < len(params)-1; i++ {
 				searchStr := params[i+2]
-				var openUrl = "https://api.tumblr.com/v2/blog/" + searchStr + "/posts/photo?api_key=nXcMfImiJuDIhaO7qNT1VF234UhRID8yab3f5tvUoOhCMDUk3y&offset=" + params[0] + "&limit=" + params[1]
+				var openUrl= "https://api.tumblr.com/v2/blog/" + searchStr + "/posts/photo?api_key=nXcMfImiJuDIhaO7qNT1VF234UhRID8yab3f5tvUoOhCMDUk3y&offset=" + params[0] + "&limit=" + params[1]
 				ctx.AddQueue(&request.Request{
 					Url:    openUrl,
 					Method: "GET",
@@ -109,28 +109,13 @@ var GirlHome = &Spider{
 					}
 					for _, post := range do.Response.Posts {
 						for _, photo := range post.Photos {
-							var picUrl = photo.Original_size.Url
+							var picUrl= photo.Original_size.Url
 
 							ctx.AddQueue(&request.Request{
 								Url:          picUrl,
 								Rule:         "下载图片",
 								ConnTimeout:  -1,
 								DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
-							})
-						}
-					}
-
-					var paramsStr = ctx.GetKeyin()
-					params := strings.Split(paramsStr, "@")
-					for i := 0; i <= len(params)-1-2 ; i++ {
-						searchStr := params[i+2]
-						for i := 1; i < do.Response.Total_posts/50; i++ {
-							var offsetStr= strconv.Itoa((i*50 + 1))
-							var openUrl= "https://api.tumblr.com/v2/blog/" + searchStr + "/posts/photo?api_key=nXcMfImiJuDIhaO7qNT1VF234UhRID8yab3f5tvUoOhCMDUk3y&offset=" + offsetStr + "&limit=50"
-							ctx.AddQueue(&request.Request{
-								Url:    openUrl,
-								Method: "GET",
-								Rule:   "获取图片",
 							})
 						}
 					}
@@ -153,7 +138,7 @@ var GirlHome = &Spider{
 
 					for _, post := range do.Response.Posts {
 						for _, photo := range post.Photos {
-							var picUrl = photo.Original_size.Url
+							var picUrl= photo.Original_size.Url
 
 							ctx.AddQueue(&request.Request{
 								Url:          picUrl,

@@ -1,4 +1,4 @@
-package pholcus_lib
+package tumblrvideo
 
 // 基础包
 import (
@@ -46,18 +46,11 @@ type ResponseData struct {
 	total_posts int64
 }
 
-type original struct {
-	Url    string
-	Width  int64
-	Height int64
-}
-type photo struct {
-	Original_size original
-}
+
 type postsObj struct {
 	Blog_name string
 	Post_url  string
-	Photos    []photo
+	Video_url     string
 }
 
 type metaObj struct {
@@ -74,8 +67,8 @@ type dataObj struct {
 }
 
 var GirlHome = &Spider{
-	Name:        "tumblr API",
-	Description: "tumblr API [https://www.tumblr.com/]",
+	Name:        "tumblr Video API",
+	Description: "tumblr Video API [https://www.tumblr.com/]",
 	//	Pausetime:    2000,
 	Keyin:        KEYIN,
 	Limit:        LIMIT,
@@ -84,9 +77,9 @@ var GirlHome = &Spider{
 		Root: func(ctx *Context) {
 			var paramsStr = ctx.GetKeyin()
 			params := strings.Split(paramsStr, "@")
-			for i := 0; i <= len(params)-1-2 ; i++ {
+			for i := 0; i <= len(params)-1-2; i++ {
 				searchStr := params[i+2]
-				var openUrl = "https://api.tumblr.com/v2/blog/" + searchStr + "/posts/photo?api_key=nXcMfImiJuDIhaO7qNT1VF234UhRID8yab3f5tvUoOhCMDUk3y&offset=" + params[0] + "&limit=" + params[1]
+				var openUrl = "https://api.tumblr.com/v2/blog/" + searchStr + "/posts/video?api_key=nXcMfImiJuDIhaO7qNT1VF234UhRID8yab3f5tvUoOhCMDUk3y&offset=" + params[0] + "&limit=" + params[1]
 				ctx.AddQueue(&request.Request{
 					Url:    openUrl,
 					Method: "GET",
@@ -108,31 +101,27 @@ var GirlHome = &Spider{
 						fmt.Println("data error", err)
 					}
 					for _, post := range do.Response.Posts {
-						for _, photo := range post.Photos {
-							var picUrl = photo.Original_size.Url
+						var picUrl = post.Video_url
 
-							ctx.AddQueue(&request.Request{
-								Url:          picUrl,
-								Rule:         "下载图片",
-								ConnTimeout:  -1,
-								DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
-							})
-						}
+						ctx.AddQueue(&request.Request{
+							Url:          picUrl,
+							Rule:         "下载图片",
+							ConnTimeout:  -1,
+							DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
+						})
 					}
 
 					var paramsStr = ctx.GetKeyin()
 					params := strings.Split(paramsStr, "@")
-					for i := 0; i <= len(params)-1-2 ; i++ {
-						searchStr := params[i+2]
-						for i := 1; i < do.Response.Total_posts/50; i++ {
-							var offsetStr= strconv.Itoa((i*50 + 1))
-							var openUrl= "https://api.tumblr.com/v2/blog/" + searchStr + "/posts/photo?api_key=nXcMfImiJuDIhaO7qNT1VF234UhRID8yab3f5tvUoOhCMDUk3y&offset=" + offsetStr + "&limit=50"
-							ctx.AddQueue(&request.Request{
-								Url:    openUrl,
-								Method: "GET",
-								Rule:   "获取图片",
-							})
-						}
+					searchStr := params[2]
+					for i := 1; i < do.Response.Total_posts/50; i++ {
+						var offsetStr = strconv.Itoa((i*50 + 1))
+						var openUrl = "https://api.tumblr.com/v2/blog/" + searchStr + "/posts/video?api_key=nXcMfImiJuDIhaO7qNT1VF234UhRID8yab3f5tvUoOhCMDUk3y&offset=" + offsetStr + "&limit=50"
+						ctx.AddQueue(&request.Request{
+							Url:    openUrl,
+							Method: "GET",
+							Rule:   "获取图片",
+						})
 					}
 				},
 			},
@@ -152,16 +141,14 @@ var GirlHome = &Spider{
 					}
 
 					for _, post := range do.Response.Posts {
-						for _, photo := range post.Photos {
-							var picUrl = photo.Original_size.Url
+						var picUrl = post.Video_url
 
-							ctx.AddQueue(&request.Request{
-								Url:          picUrl,
-								Rule:         "下载图片",
-								ConnTimeout:  -1,
-								DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
-							})
-						}
+						ctx.AddQueue(&request.Request{
+							Url:          picUrl,
+							Rule:         "下载图片",
+							ConnTimeout:  -1,
+							DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
+						})
 					}
 
 				},
