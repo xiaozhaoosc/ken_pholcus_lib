@@ -34,7 +34,7 @@ func init() {
 
 var GirlHome = &Spider{
 	Name:        "adec23",
-	Description: "adec [https://adcabi.com/index.html]",
+	Description: "adec23 [https://adcabi.com/index.html]",
 	//	Pausetime:    2000,
 	Keyin:        KEYIN,
 	Limit:        LIMIT,
@@ -57,26 +57,26 @@ var GirlHome = &Spider{
 					query := ctx.GetDom()
 					tabs := query.Find(".col-xs-6 col-sm-6 col-md-3")
 					fmt.Printf("tabs%v", tabs)
-					isOk := false
+					var title = query.Find(".col-xs-6 col-sm-6 col-md-3").Find(".list-item").Find(".name")
+					// var pic = s.Find(".img-responsive").Attr("src")
+					fmt.Printf("title%v", title)
+					// fmt.Printf("pic%v", pic)
+					// "pic":   pic,
+					var date = query.Find(".col-xs-6 col-sm-6 col-md-3").Find(".list-item").Find(".info row").Find(".col-sm-8").Find(".date")
+					fmt.Printf("date%v", date)
+					ctx.Output(map[string]interface{}{
+						"title": title,
+						"date":  date,
+					})
 					tabs.Find(".list-item").Each(func(i int, s *goquery.Selection) {
-						if url, ok := s.Attr("href"); ok {
-							if isOk {
-								return
-							}
+						// if url, ok := s.Attr("href"); ok {
+						// 	if isOk {
+						// 		return
+						// 	}
 
-							isOk = true
+						// 	isOk = true
 
-							var title = s.Find(".name")
-							// var pic = s.Find(".img-responsive").Attr("src")
-							fmt.Printf("title%v", title)
-							// fmt.Printf("pic%v", pic)
-							// "pic":   pic,
-							fmt.Printf("url%v", url)
-							ctx.Output(map[string]interface{}{
-								"title": title,
-								"url":   url,
-							})
-						}
+						// }
 
 					})
 
