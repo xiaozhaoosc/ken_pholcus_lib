@@ -33,7 +33,7 @@ func init() {
 }
 
 var GirlHome = &Spider{
-	Name:        "adec",
+	Name:        "adec23",
 	Description: "adec [https://adcabi.com/index.html]",
 	//	Pausetime:    2000,
 	Keyin:        KEYIN,
@@ -41,6 +41,7 @@ var GirlHome = &Spider{
 	EnableCookie: true,
 	RuleTree: &RuleTree{
 		Root: func(ctx *Context) {
+			fmt.Printf("test1%v", "test1")
 			ctx.AddQueue(&request.Request{
 				Url:    "https://adcabi.com/index.html",
 				Method: "GET",
