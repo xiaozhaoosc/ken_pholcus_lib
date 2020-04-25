@@ -52,8 +52,10 @@ var GirlHome = &Spider{
 				ParseFunc: func(ctx *Context) {
 					// var paramsStr = ctx.GetKeyin()
 
+					fmt.Printf("test%v", "test")
 					query := ctx.GetDom()
 					tabs := query.Find(".col-xs-6 col-sm-6 col-md-3")
+					fmt.Printf("tabs%v", tabs)
 					isOk := false
 					tabs.Find(".list-item").Each(func(i int, s *goquery.Selection) {
 						if url, ok := s.Attr("href"); ok {
