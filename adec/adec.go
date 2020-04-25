@@ -21,8 +21,9 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
 	// 其他包
-	//	"fmt"
+	"fmt"
 	// "math"
 	// "time"
 )
@@ -32,8 +33,8 @@ func init() {
 }
 
 var GirlHome = &Spider{
-	Name:        "pronstar",
-	Description: "pronstar [http://www.pornhub.com/]",
+	Name:        "adec",
+	Description: "adec [https://adcabi.com/index.html]",
 	//	Pausetime:    2000,
 	Keyin:        KEYIN,
 	Limit:        LIMIT,
@@ -41,7 +42,7 @@ var GirlHome = &Spider{
 	RuleTree: &RuleTree{
 		Root: func(ctx *Context) {
 			ctx.AddQueue(&request.Request{
-				Url:    "https://www.pornhub.com",
+				Url:    "https://adcabi.com/index.html",
 				Method: "GET",
 				Rule:   "首页",
 			})
@@ -49,63 +50,38 @@ var GirlHome = &Spider{
 		Trunk: map[string]*Rule{
 			"首页": {
 				ParseFunc: func(ctx *Context) {
+					// var paramsStr = ctx.GetKeyin()
+
 					query := ctx.GetDom()
-					logintoken := query.Find(".js-loginFormModal")
-					redirect, _ := logintoken.Find(".js-redirect").Attr("value")
-					token, _ := logintoken.Find("[name='token']").Attr("value")
-					remember_me, _ := logintoken.Find("[name='remember_me']").Attr("value")
-					from, _ := logintoken.Find("[name='from']").Attr("value")
+					tabs := query.Find(".col-xs-6 col-sm-6 col-md-3")
+					isOk := false
+					tabs.Find(".list-item").Each(func(i int, s *goquery.Selection) {
+						if url, ok := s.Attr("href"); ok {
+							if isOk {
+								return
+							}
 
-					//					fmt.Println("首页：redirect=" + redirect + "&token=" + token + "&remember_me=" + remember_me + "&from=" + from)
+							isOk = true
 
-					ctx.AddQueue(&request.Request{
-						Url:      "https://www.pornhub.com/login",
-						Method:   "POST",
-						PostData: "redirect=" + redirect + "&token=" + token + "&remember_me=" + remember_me + "&from=" + from + "&username=kenzhao&password=a123456",
-						Rule:     "登录",
-						Header:   http.Header{"Content-Type": []string{"application/x-www-form-urlencoded; charset=UTF-8"}},
+							var title = s.Find(".name")
+							// var pic = s.Find(".img-responsive").Attr("src")
+							fmt.Printf("title%v", title)
+							// fmt.Printf("pic%v", pic)
+							// "pic":   pic,
+							fmt.Printf("url%v", url)
+							ctx.Output(map[string]interface{}{
+								"title": title,
+								"url":   url,
+							})
+						}
+
 					})
-				},
-			},
-			"登录": {
-				ParseFunc: func(ctx *Context) {
-					query := ctx.GetDom()
-					logintoken := query.Find(".js-loginFormModal")
-					redirect, _ := logintoken.Find(".js-redirect").Attr("value")
-					token, _ := logintoken.Find("[name='token']").Attr("value")
-					remember_me, _ := logintoken.Find("[name='remember_me']").Attr("value")
-					from, _ := logintoken.Find("[name='from']").Attr("value")
 
-					//					fmt.Println("登陆login：redirect=" + redirect + "&token=" + token + "&remember_me=" + remember_me + "&from=" + from)
+					// ctx.AddQueue(&request.Request{
+					// 	Url:  "https://adcabi.com" + url,
+					// 	Rule: "home页面",
+					// })
 
-					ctx.AddQueue(&request.Request{
-						Url:      "https://www.pornhub.com/front/authenticate",
-						Header:   http.Header{"Content-Type": []string{"application/x-www-form-urlencoded; charset=UTF-8"}},
-						Method:   "POST",
-						PostData: "redirect=" + redirect + "&token=" + token + "&remember_me=" + remember_me + "&from=" + from + "&username=kenzhao&password=a123456",
-						Rule:     "登录后",
-					})
-				},
-			},
-			"登录后": {
-				ParseFunc: func(ctx *Context) {
-					var paramsStr = ctx.GetKeyin()
-					params := strings.Split(paramsStr, "@")
-
-					startIndex, error := strconv.Atoi(params[0])
-					endIndex, error := strconv.Atoi(params[1])
-					if error != nil {
-						//							logs.Logs("字符串转换成整数失败")
-					}
-					searchStr := params[2]
-
-					//							Url:  "https://www.pornhub.com/" + searchStr + "&page=" + strconv.Itoa(i),
-					for i := startIndex; i <= endIndex; i++ {
-						ctx.AddQueue(&request.Request{
-							Url:  "https://www.pornhub.com/" + searchStr,
-							Rule: "home页面",
-						})
-					}
 				},
 			},
 			"获取明细": {
@@ -136,12 +112,55 @@ var GirlHome = &Spider{
 								"title":     fileName,
 								"url":       url,
 							})
-							//							ctx.AddQueue(&request.Request{
-							//								Url:          url,
-							//								Header:       http.Header{"Content-Type": []string{"application/x-www-form-urlencoded; charset=UTF-8"}},
-							//								Rule:         "下载视频",
-							//								DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
-							//							})
+
+							ctx.AddQueue(&request.Request{
+								Url:          url,
+								Rule:         "下载视频",
+								Temp:         map[string]interface{}{"titleName": titleName + fileName, "valid": valid, "viewsNum": viewsNum},
+								ConnTimeout:  -1,
+								DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
+							})
+						}
+
+					})
+
+					relatedVideosCenter := query.Find(".underplayer-thumbs").Find(".videoblock")
+					relatedVideosCenter.Each(func(i int, s *goquery.Selection) {
+						//评分 73%!<(MISSING)
+						valNum := s.Find(".thumbnail-info-wrapper").Find(".value").Text()
+						var reg = regexp.MustCompile("[0-9]*")
+
+						var valid = reg.FindString(valNum)
+						b, error := strconv.Atoi(valid)
+						if error != nil {
+							//							logs.Logs("字符串转换成整数失败")
+						}
+						//观看次数
+						viewsNum := s.Find(".thumbnail-info-wrapper").Find(".views").Find("var").Text()
+						//						var viewsid = reg.FindString(viewsNum)
+
+						vals := strings.Split(viewsNum, ",")
+
+						viewsNum = strings.Join(vals, "")
+
+						c, error := strconv.Atoi(viewsNum)
+						if error != nil {
+							//							logs.Logs("字符串转换成整数失败")
+						}
+
+						if b > 78 && c > 300000 {
+							videoInfo := s.Find("a")
+							//详细页面
+							openUrl, _ := videoInfo.Attr("href")
+							//名称
+							title := videoInfo.Text()
+
+							ctx.AddQueue(&request.Request{
+								Url:    "https://www.pornhub.com" + openUrl,
+								Header: http.Header{"Content-Type": []string{"application/x-www-form-urlencoded; charset=UTF-8"}},
+								Temp:   map[string]interface{}{"title": title, "valid": valid, "viewsNum": viewsNum},
+								Rule:   "获取明细",
+							})
 						}
 
 					})
@@ -150,15 +169,12 @@ var GirlHome = &Spider{
 			"下载视频": {
 				ParseFunc: func(ctx *Context) {
 					var title = ctx.GetUrl()
-					title = strings.Replace(title, "https://", " ", -1)
-					a := strings.Split(title, "?")
-					b := strings.Split(a[0], "/")
-					fileName := b[2] + b[3] + b[4] + b[5]
+					var titleName = ctx.GetTemp("title", "").(string)
 					ctx.Output(map[string]interface{}{
-						"title": fileName,
+						"title": titleName,
 						"url":   title,
 					})
-					ctx.FileOutput(fileName)
+					ctx.FileOutput(titleName)
 				},
 			},
 			"home页面": {
@@ -200,7 +216,7 @@ var GirlHome = &Spider{
 							//							logs.Logs("字符串转换成整数失败")
 						}
 
-						if b > 85 || c > 120000 {
+						if b > 78 || c > 300000 {
 							videoInfo := s.Find("a")
 							//详细页面
 							openUrl, _ := videoInfo.Attr("href")

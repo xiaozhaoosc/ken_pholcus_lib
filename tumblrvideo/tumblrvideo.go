@@ -1,14 +1,16 @@
-package tumblrvideo
+package ken_pholcus_lib
 
 // 基础包
 import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+
 	//	"math"
 
 	"github.com/henrylee2cn/pholcus/app/downloader/request" //必需
 	. "github.com/henrylee2cn/pholcus/app/spider"           //必需
+
 	//	"github.com/henrylee2cn/pholcus/common/goquery"         //DOM解析
 	//	"github.com/henrylee2cn/pholcus/logs"                   //信息输出
 	// . "github.com/henrylee2cn/pholcus/app/spider/common"          //选用
@@ -46,11 +48,10 @@ type ResponseData struct {
 	total_posts int64
 }
 
-
 type postsObj struct {
 	Blog_name string
 	Post_url  string
-	Video_url     string
+	Video_url string
 }
 
 type metaObj struct {

@@ -1,14 +1,16 @@
-package pholcus_lib
+package ken_pholcus_lib
 
 // 基础包
 import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+
 	//	"math"
 
 	"github.com/henrylee2cn/pholcus/app/downloader/request" //必需
 	. "github.com/henrylee2cn/pholcus/app/spider"           //必需
+
 	//	"github.com/henrylee2cn/pholcus/common/goquery"         //DOM解析
 	//	"github.com/henrylee2cn/pholcus/logs"                   //信息输出
 	// . "github.com/henrylee2cn/pholcus/app/spider/common"          //选用
@@ -84,7 +86,7 @@ var GirlHome = &Spider{
 		Root: func(ctx *Context) {
 			var paramsStr = ctx.GetKeyin()
 			params := strings.Split(paramsStr, "@")
-			for i := 0; i <= len(params)-1-2 ; i++ {
+			for i := 0; i <= len(params)-1-2; i++ {
 				searchStr := params[i+2]
 				var openUrl = "https://api.tumblr.com/v2/blog/" + searchStr + "/posts/photo?api_key=nXcMfImiJuDIhaO7qNT1VF234UhRID8yab3f5tvUoOhCMDUk3y&offset=" + params[0] + "&limit=" + params[1]
 				ctx.AddQueue(&request.Request{
@@ -122,11 +124,11 @@ var GirlHome = &Spider{
 
 					var paramsStr = ctx.GetKeyin()
 					params := strings.Split(paramsStr, "@")
-					for i := 0; i <= len(params)-1-2 ; i++ {
+					for i := 0; i <= len(params)-1-2; i++ {
 						searchStr := params[i+2]
 						for i := 1; i < do.Response.Total_posts/50; i++ {
-							var offsetStr= strconv.Itoa((i*50 + 1))
-							var openUrl= "https://api.tumblr.com/v2/blog/" + searchStr + "/posts/photo?api_key=nXcMfImiJuDIhaO7qNT1VF234UhRID8yab3f5tvUoOhCMDUk3y&offset=" + offsetStr + "&limit=50"
+							var offsetStr = strconv.Itoa((i*50 + 1))
+							var openUrl = "https://api.tumblr.com/v2/blog/" + searchStr + "/posts/photo?api_key=nXcMfImiJuDIhaO7qNT1VF234UhRID8yab3f5tvUoOhCMDUk3y&offset=" + offsetStr + "&limit=50"
 							ctx.AddQueue(&request.Request{
 								Url:    openUrl,
 								Method: "GET",
