@@ -5,8 +5,9 @@ import (
 	"github.com/henrylee2cn/pholcus/app/downloader/request" //必需
 	"github.com/henrylee2cn/pholcus/common/goquery"         //DOM解析
 
-	// "github.com/henrylee2cn/pholcus/logs"               //信息输出
 	. "github.com/henrylee2cn/pholcus/app/spider" //必需
+	// "github.com/henrylee2cn/pholcus/logs"         //信息输出
+
 	// . "github.com/henrylee2cn/pholcus/app/spider/common"          //选用
 
 	// net包
@@ -33,82 +34,65 @@ func init() {
 
 var GirlHome = &Spider{
 	Name:        "妹子图",
-	Description: "妹子图 [http://www.meizitu.com/]",
-	// Pausetime: 300,
-	// Keyin:   KEYIN,
+	Description: "妹子图[https://www.mzitu.com/]",
+	// Pausetime: 300,https://www.mzitu.com/jiepai/comment-page-1/#comments
+	Keyin: KEYIN,
 	// Limit:        LIMIT,
 	EnableCookie: false,
 	RuleTree: &RuleTree{
 		Root: func(ctx *Context) {
-			for i := 1; i < 4; i++ {
-				ctx.AddQueue(&request.Request{
-					Url:  "http://www.meizitu.com/a/xinggan_2_" + strconv.Itoa(i) + ".html",
-					Rule: "获取列表",
-				})
-			}
-			for i := 1; i < 4; i++ {
-				ctx.AddQueue(&request.Request{
-					Url:  "http://www.meizitu.com/a/sifang_5_" + strconv.Itoa(i) + ".html",
-					Rule: "获取列表",
-				})
-			}
-			//			for i := 1; i < 4; i++ {
-			//				ctx.AddQueue(&request.Request{
-			//					Url:  "http://www.meizitu.com/a/xiaoqingxin_6_" + strconv.Itoa(i) + ".html",
-			//					Rule: "获取列表",
-			//				})
-			//			}
-			//			for i := 1; i < 2000; i++ {
-			//				ctx.AddQueue(&request.Request{
-			//					Url:  "http://www.meizitu.com/a/" + strconv.Itoa(i) + ".html",
-			//					Rule: "详细内容",
-			//				})
-			//			}
+			ctx.Aid(map[string]interface{}{"loop": [2]int{0, 1}, "Rule": "生成请求"}, "生成请求")
+
+			// logs.Log.Debug("详细内容startIndex%v,%v,%v", startIndex, endIndex, searchStr)
 		},
 
 		Trunk: map[string]*Rule{
-			"获取列表": {
-				ParseFunc: func(ctx *Context) {
-					query := ctx.GetDom()
-					query.Find(".pic").
-						Each(func(i int, s *goquery.Selection) {
-							openurl, _ := s.Find("a").Attr("href")
-							imgUrl, _ := s.Find("img").Attr("src")
-
-							ctx.Output(map[string]interface{}{
-								"imgURL":  imgUrl,
-								"openurl": openurl,
-							})
-							ctx.AddQueue(&request.Request{
-								Url:  openurl,
-								Rule: "详细内容",
-							})
+			"生成请求": {
+				AidFunc: func(ctx *Context, aid map[string]interface{}) interface{} {
+					var paramsStr = ctx.GetKeyin()
+					params := strings.Split(paramsStr, "@")
+					startIndex, error := strconv.Atoi(params[0])
+					endIndex, error := strconv.Atoi(params[1])
+					if error != nil {
+					}
+					searchStr := params[2]
+					for i := startIndex; i < endIndex; i++ {
+						ctx.AddQueue(&request.Request{
+							Url:  "https://www.mzitu.com/" + searchStr + "/comment-page-" + strconv.Itoa(i) + "/#comments",
+							Rule: "详细内容",
 						})
+					}
+					// for i := 1; i < 89; i++ {
+					// 	ctx.AddQueue(&request.Request{
+					// 		Url:  "https://www.mzitu.com/jiepai/comment-page-" + strconv.Itoa(i) + "/#comments",
+					// 		Rule: "详细内容",
+					// 	})
+					// }
+					return nil
+				},
+				ParseFunc: func(ctx *Context) {
 				},
 			},
 			"详细内容": {
 				ParseFunc: func(ctx *Context) {
-					detail := ctx.GetDom().Find("div#picture p")
-					detail.Find("img").
-						Each(func(i int, s *goquery.Selection) {
-							alt, _ := s.Attr("alt")
-							imgUrl, _ := s.Attr("src")
-							paths := strings.Split(imgUrl, "/")
-							len := len(paths)
-							fileName := paths[len-4] + paths[len-3] + paths[len-2] + paths[len-1]
-							ctx.Output(map[string]interface{}{
-								"alt":      alt,
-								"fileName": fileName,
-								"imgURL":   imgUrl,
-							})
-
-							ctx.AddQueue(&request.Request{
-								Url:          imgUrl,
-								Rule:         "下载图片",
-								ConnTimeout:  -1,
-								DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
-							})
+					detail := ctx.GetDom().Find("img.lazy")
+					detail.Each(func(i int, s *goquery.Selection) {
+						imgUrl, _ := s.Attr("data-original")
+						paths := strings.Split(imgUrl, "/")
+						len := len(paths)
+						fileName := paths[len-2] + paths[len-1]
+						ctx.Output(map[string]interface{}{
+							"fileName": fileName,
+							"imgURL":   imgUrl,
 						})
+
+						ctx.AddQueue(&request.Request{
+							Url:          imgUrl,
+							Rule:         "下载图片",
+							ConnTimeout:  -1,
+							DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
+						})
+					})
 				},
 			},
 			"下载图片": {
@@ -116,7 +100,7 @@ var GirlHome = &Spider{
 					var title = ctx.GetUrl()
 					paths := strings.Split(title, "/")
 					len := len(paths)
-					fileName := paths[len-4] + paths[len-3] + paths[len-2] + paths[len-1]
+					fileName := paths[len-2] + paths[len-1]
 					ctx.Output(map[string]interface{}{
 						"title": fileName,
 					})

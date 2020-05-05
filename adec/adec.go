@@ -6,11 +6,11 @@ import (
 	. "github.com/henrylee2cn/pholcus/app/spider"           //必需
 	"github.com/henrylee2cn/pholcus/common/goquery"         //DOM解析
 
-	//	"github.com/henrylee2cn/pholcus/logs"                   //信息输出
+	"github.com/henrylee2cn/pholcus/logs" //信息输出
 	// . "github.com/henrylee2cn/pholcus/app/spider/common"          //选用
 
 	// net包
-	"net/http" //设置http.Header
+	// "net/http" //设置http.Header
 	// "net/url"
 
 	// 编码包
@@ -18,12 +18,11 @@ import (
 	// "encoding/json"
 
 	// 字符串处理包
-	"regexp"
+	// "regexp"
 	"strconv"
 	"strings"
-
 	// 其他包
-	"fmt"
+	// "fmt"
 	// "math"
 	// "time"
 )
@@ -33,57 +32,76 @@ func init() {
 }
 
 var GirlHome = &Spider{
-	Name:        "adec23",
-	Description: "adec23 [https://adcabi.com/index.html]",
+	Name:        "adec",
+	Description: "adec [https://adcabi.com/index.html]",
 	//	Pausetime:    2000,
 	Keyin:        KEYIN,
 	Limit:        LIMIT,
 	EnableCookie: true,
 	RuleTree: &RuleTree{
 		Root: func(ctx *Context) {
-			fmt.Printf("test1%v", "test1")
-			ctx.AddQueue(&request.Request{
-				Url:    "https://adcabi.com/index.html",
-				Method: "GET",
-				Rule:   "首页",
-			})
+			ctx.Aid(map[string]interface{}{"loop": [2]int{0, 1}, "Rule": "生成请求"}, "生成请求")
 		},
 		Trunk: map[string]*Rule{
-			"首页": {
+			"生成请求": {
+				AidFunc: func(ctx *Context, aid map[string]interface{}) interface{} {
+					var paramsStr string = ctx.GetKeyin()
+					if len(paramsStr) > 5 {
+						params := strings.Split(paramsStr, "@")
+						if len(params) < 2 {
+							ctx.AddQueue(&request.Request{
+								Url:    paramsStr,
+								Method: "GET",
+								Rule:   "列表页面",
+							})
+						} else {
+							startIndex, error := strconv.Atoi(params[1])
+							endIndex, error := strconv.Atoi(params[2])
+							if error != nil {
+							}
+							searchStr := params[0]
+							for i := startIndex; i < endIndex; i++ {
+								ctx.AddQueue(&request.Request{
+									Url:  searchStr + strconv.Itoa(i) + ".html",
+									Rule: "列表页面",
+								})
+							}
+						}
+					} else {
+
+						ctx.AddQueue(&request.Request{
+							Url:    "https://adcabi.com/index.html",
+							Method: "GET",
+							Rule:   "列表页面",
+						})
+					}
+
+					// logs.Log.Debug("详细内容startIndex%v,%v,%v", startIndex, endIndex, searchStr)
+					return nil
+				},
 				ParseFunc: func(ctx *Context) {
-					// var paramsStr = ctx.GetKeyin()
-
-					fmt.Printf("test%v", "test")
+				},
+			},
+			"列表页面": {
+				ParseFunc: func(ctx *Context) {
 					query := ctx.GetDom()
-					tabs := query.Find(".col-xs-6 col-sm-6 col-md-3")
-					fmt.Printf("tabs%v", tabs)
-					var title = query.Find(".col-xs-6 col-sm-6 col-md-3").Find(".list-item").Find(".name")
-					// var pic = s.Find(".img-responsive").Attr("src")
-					fmt.Printf("title%v", title)
-					// fmt.Printf("pic%v", pic)
-					// "pic":   pic,
-					var date = query.Find(".col-xs-6 col-sm-6 col-md-3").Find(".list-item").Find(".info row").Find(".col-sm-8").Find(".date")
-					fmt.Printf("date%v", date)
-					ctx.Output(map[string]interface{}{
-						"title": title,
-						"date":  date,
+					list := query.Find(".list-item")
+					list.Each(func(i int, s *goquery.Selection) {
+						logs.Log.Debug("s:%v", s.Text())
+						url, _ := s.Find("a").Attr("href")
+						var title = s.Find(".name").Text()
+						pic, _ := s.Find(".img-responsive").Attr("src")
+						var author = s.Find(".author").Text()
+						var date = s.Find(".date").Text()
+
+						if strings.Index(url, "http") < 0 {
+							ctx.AddQueue(&request.Request{
+								Url:  "https://adcabi.com" + url,
+								Rule: "获取明细",
+								Temp: map[string]interface{}{"title": title, "url": url, "pic": pic, "author": author, "date": date},
+							})
+						}
 					})
-					tabs.Find(".list-item").Each(func(i int, s *goquery.Selection) {
-						// if url, ok := s.Attr("href"); ok {
-						// 	if isOk {
-						// 		return
-						// 	}
-
-						// 	isOk = true
-
-						// }
-
-					})
-
-					// ctx.AddQueue(&request.Request{
-					// 	Url:  "https://adcabi.com" + url,
-					// 	Rule: "home页面",
-					// })
 
 				},
 			},
@@ -91,150 +109,39 @@ var GirlHome = &Spider{
 				ParseFunc: func(ctx *Context) {
 					query := ctx.GetDom()
 					var titleName = ctx.GetTemp("title", "").(string)
-					var valid = ctx.GetTemp("valid", "").(string)
-					var viewsNum = ctx.GetTemp("viewsNum", "").(string)
-					tabs := query.Find(".video-actions-container").Find(".video-actions-tabs")
-					isOk := false
-					tabs.Find(".video-action-tab").Find("a.downloadBtn").Each(func(i int, s *goquery.Selection) {
-						if url, ok := s.Attr("href"); ok {
-							if isOk {
-								return
-							}
+					var pic = ctx.GetTemp("pic", "").(string)
+					var date = ctx.GetTemp("date", "").(string)
+					var author = ctx.GetTemp("author", "").(string)
+					var url = ctx.GetTemp("url", "").(string)
+					downUrl, _ := query.Find(".share_div").Find("a").Attr("href")
 
-							isOk = true
-
-							var title = url
-							title = strings.Replace(title, "https://", " ", -1)
-							a := strings.Split(title, "?")
-							b := strings.Split(a[0], "/")
-							fileName := b[2] + b[3] + b[4] + b[5]
-							ctx.Output(map[string]interface{}{
-								"titleName": titleName,
-								"valid":     valid,
-								"viewsNum":  viewsNum,
-								"title":     fileName,
-								"url":       url,
-							})
-
-							ctx.AddQueue(&request.Request{
-								Url:          url,
-								Rule:         "下载视频",
-								Temp:         map[string]interface{}{"titleName": titleName + fileName, "valid": valid, "viewsNum": viewsNum},
-								ConnTimeout:  -1,
-								DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
-							})
-						}
-
+					logs.Log.Debug("title%v", titleName)
+					// logs.Log.Debug("pic%v", pic)
+					// logs.Log.Debug("date%v", date)
+					// logs.Log.Debug("author%v", author)
+					// logs.Log.Debug("url:%v", url)
+					ctx.Output(map[string]interface{}{
+						"title":   titleName,
+						"downUrl": downUrl,
+						"url":     url,
+						"pic":     pic,
+						"author":  author,
+						"date":    date,
 					})
 
-					relatedVideosCenter := query.Find(".underplayer-thumbs").Find(".videoblock")
-					relatedVideosCenter.Each(func(i int, s *goquery.Selection) {
-						//评分 73%!<(MISSING)
-						valNum := s.Find(".thumbnail-info-wrapper").Find(".value").Text()
-						var reg = regexp.MustCompile("[0-9]*")
-
-						var valid = reg.FindString(valNum)
-						b, error := strconv.Atoi(valid)
-						if error != nil {
-							//							logs.Logs("字符串转换成整数失败")
-						}
-						//观看次数
-						viewsNum := s.Find(".thumbnail-info-wrapper").Find(".views").Find("var").Text()
-						//						var viewsid = reg.FindString(viewsNum)
-
-						vals := strings.Split(viewsNum, ",")
-
-						viewsNum = strings.Join(vals, "")
-
-						c, error := strconv.Atoi(viewsNum)
-						if error != nil {
-							//							logs.Logs("字符串转换成整数失败")
-						}
-
-						if b > 78 && c > 300000 {
-							videoInfo := s.Find("a")
-							//详细页面
-							openUrl, _ := videoInfo.Attr("href")
-							//名称
-							title := videoInfo.Text()
-
-							ctx.AddQueue(&request.Request{
-								Url:    "https://www.pornhub.com" + openUrl,
-								Header: http.Header{"Content-Type": []string{"application/x-www-form-urlencoded; charset=UTF-8"}},
-								Temp:   map[string]interface{}{"title": title, "valid": valid, "viewsNum": viewsNum},
-								Rule:   "获取明细",
-							})
-						}
-
+					ctx.AddQueue(&request.Request{
+						Url:          downUrl,
+						Rule:         "下载视频",
+						Temp:         map[string]interface{}{"titleName": titleName},
+						ConnTimeout:  -1,
+						DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
 					})
 				},
 			},
 			"下载视频": {
 				ParseFunc: func(ctx *Context) {
-					var title = ctx.GetUrl()
 					var titleName = ctx.GetTemp("title", "").(string)
-					ctx.Output(map[string]interface{}{
-						"title": titleName,
-						"url":   title,
-					})
 					ctx.FileOutput(titleName)
-				},
-			},
-			"home页面": {
-				ParseFunc: func(ctx *Context) {
-					query := ctx.GetDom()
-
-					//其它页面
-					//					profileMenuDropdown := query.Find("#profileMenuDropdown")
-					//					profile, _ := profileMenuDropdown.Find(".profile").Attr("href")
-					//					videos, _ := profileMenuDropdown.Find(".videos").Attr("href")
-					//					favorites, _ := profileMenuDropdown.Find(".favorites").Attr("href")
-					//					playlists, _ := profileMenuDropdown.Find(".playlists").Attr("href")
-					//					photos, _ := profileMenuDropdown.Find(".photos").Attr("href")
-					//					recommended  video/search?search=
-					//					ht := "/video?o=ht" hot
-					//					mv := "/video?o=mv" Most Viewed
-					//					tr := "/video?o=tr" Top Rate
-
-					query.Find(".thumbnail-info-wrapper").Each(func(i int, s *goquery.Selection) {
-						//评分 73%!<(MISSING)
-						valNum := s.Find(".value").Text()
-						var reg = regexp.MustCompile("[0-9]*")
-
-						var valid = reg.FindString(valNum)
-						b, error := strconv.Atoi(valid)
-						if error != nil {
-							//							logs.Logs("字符串转换成整数失败")
-						}
-						//观看次数
-						viewsNum := s.Find(".views").Find("var").Text()
-						//						var viewsid = reg.FindString(viewsNum)
-
-						vals := strings.Split(viewsNum, ",")
-
-						viewsNum = strings.Join(vals, "")
-
-						c, error := strconv.Atoi(viewsNum)
-						if error != nil {
-							//							logs.Logs("字符串转换成整数失败")
-						}
-
-						if b > 78 || c > 300000 {
-							videoInfo := s.Find("a")
-							//详细页面
-							openUrl, _ := videoInfo.Attr("href")
-							//名称
-							title := videoInfo.Text()
-
-							ctx.AddQueue(&request.Request{
-								Url:    "https://www.pornhub.com" + openUrl,
-								Header: http.Header{"Content-Type": []string{"application/x-www-form-urlencoded; charset=UTF-8"}},
-								Temp:   map[string]interface{}{"title": title, "valid": valid, "viewsNum": viewsNum},
-								Rule:   "获取明细",
-							})
-						}
-
-					})
 				},
 			},
 		},
