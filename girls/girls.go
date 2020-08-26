@@ -33,8 +33,8 @@ func init() {
 }
 
 var GirlHome = &Spider{
-	Name:        "妹子图",
-	Description: "妹子图[https://www.mzitu.com/]",
+	Name:        "mzitu",
+	Description: "mzitu[https://www.mzitu.com/]",
 	// Pausetime: 300,https://www.mzitu.com/jiepai/comment-page-1/#comments
 	Keyin: KEYIN,
 	// Limit:        LIMIT,
@@ -86,12 +86,12 @@ var GirlHome = &Spider{
 							"imgURL":   imgUrl,
 						})
 
-						ctx.AddQueue(&request.Request{
-							Url:          imgUrl,
-							Rule:         "下载图片",
-							ConnTimeout:  -1,
-							DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
-						})
+						// ctx.AddQueue(&request.Request{
+						// 	Url:          imgUrl,
+						// 	Rule:         "下载图片",
+						// 	ConnTimeout:  -1,
+						// 	DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
+						// })
 					})
 				},
 			},
@@ -104,7 +104,7 @@ var GirlHome = &Spider{
 					ctx.Output(map[string]interface{}{
 						"title": fileName,
 					})
-					ctx.FileOutput(fileName)
+					// ctx.FileOutput(fileName)
 				},
 			},
 		},

@@ -38,6 +38,13 @@ func main() {
 
 ```
 
+3. 修改mysql
+```
+设置表名
+
+	names := strings.Split(name, "_")
+	self.tableName = wrapSqlKey(time.Now().Format("2006010215") + names[0] + names[4])
+```
 ## 爬虫规则列表
 
 |子目录|规则描述|
