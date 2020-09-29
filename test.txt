@@ -1,0 +1,127 @@
+/* eslint-disable no-unused-vars, no-var */
+
+var config = {
+    hosts: {
+        domain: 'meet.wg999999.com',
+        call_control:'callcontrol.meet.wg999999.com',
+        muc: 'conference.meet.wg999999.com', // FIXME: use XEP-0030
+        focus: 'focus.meet.wg999999.com',
+    },
+    disableSimulcast: false,
+    enableRemb: false,
+    enableTcc: true,
+    resolution: 640,
+    constraints: {
+        video: {
+            aspectRatio: 16 / 9,
+            height: {
+                ideal: 640,
+                max: 640,
+                min: 360
+            }
+        }
+    },
+    externalConnectUrl: '//meet.wg999999.com:4431/http-pre-bind',
+    analyticsScriptUrls: [
+        "https://meet.wg999999.com:4431/libs/analytics-ga.js",
+    ],
+
+    enableP2P: true, // flag to control P2P connections
+    // New P2P options
+    p2p: {
+        enabled: true,
+        preferH264: true,
+        disableH264: true,
+        useStunTurn: true, // use XEP-0215 to fetch STUN and TURN server for the P2P connection
+        stunServers: [
+            //{ urls: "stun:47.99.137.104:8478"},
+            //{ urls: "stun:47.99.137.104:8479"},
+            //{ urls: "stun:47.99.137.104:8490"}
+            { urls: "stun:stun1.l.google.com:19302" },
+            { urls: "stun:stun2.l.google.com:19302" },
+            { urls: "stun:stun3.l.google.com:19302" }
+        ]
+    },
+    useStunTurn: true, // use XEP-0215 to fetch STUN and TURN server for the JVB connection
+    useIPv6: false, // ipv6 support. use at your own risk
+    useNicks: false,
+    bosh: '//meet.wg999999.com:4431/http-bind', // FIXME: use xep-0156 for that
+
+    etherpad_base: 'https://meet.wg999999.com:4431/etherpad/p/',
+    clientNode: 'http://jitsi.org/jitsimeet', // The name of client node advertised in XEP-0115 'c' stanza
+    //deprecated desktop sharing settings, included only because older version of jitsi-meet require them
+
+    enableLipSync: false, // Disables lip-sync everywhere.
+    disableRtx: false, // Enables RTX everywhere
+    enableRtpStats: false, // Enables RTP stats processing
+    enableStatsID: true,
+    openSctp: true, // Toggle to enable/disable SCTP channels
+    channelLastN: -1, // The default value of the channel attribute last-n.
+    minHDHeight: 360,
+    startBitrate: "800",
+    disableAudioLevels: false,
+    useRtcpMux: true,
+    useBundle: true,
+    disableSuspendVideo: true,
+    stereo: false,
+    forceJVB121Ratio:  -1,
+    enableTalkWhileMuted: true,
+
+    enableClosePage: true,
+    defaultLanguage:'zhCN',
+
+    hiddenDomain: 'recorder.meet.wg999999.com',
+    dropbox: {
+        appKey: '3v5iyto7n7az02w'
+    },
+    transcribingEnabled: false,
+    enableRecording: true,
+    liveStreamingEnabled: true,
+    fileRecordingsEnabled: true,
+    requireDisplayName: false,
+    recordingType: 'jibri',
+    enableWelcomePage: false,
+    disable1On1Mode:true,
+    isBrand: false,
+    logStats: false,
+    callStatsID: "347489791",//Application ID for callstats.io API
+    callStatsSecret: "169aw6v+hk9TbVuHN2SiDCgfkkU=",//Secret for callstats.io API
+
+    peopleSearchQueryTypes: ['user','conferenceRooms'],
+    startAudioMuted: 9,
+    startVideoMuted: 9,
+    enableUserRolesBasedOnToken: false,
+    atlassianAnalyticsEventUrl: "https://analytics.atlassian.com/analytics/event",
+    atlassianAnalyticsEvent: {
+        product: "lib-jitsi-meet",
+        subproduct: "hcv-meetjitsi",
+        name: "jitsi.page.load.failed",
+        server: "meet.wg999999.com"
+    },
+    deploymentInfo: {
+        environment: 'hcv-meetjitsi',
+        envType: 'prod',
+        releaseNumber: '83',
+        shard: 'hcv-meetjitsi-ap-se-1a-s2',
+        region: 'ap-southeast-1',
+        userRegion: 'ap-southeast-1',
+        crossRegion: (!'ap-southeast-1' || 'ap-southeast-1' === 'ap-southeast-1') ? 0 : 1
+    },
+    rttMonitor: {
+        enabled: true,
+        initialDelay: 30000,
+        getStatsInterval: 10000,
+        analyticsInterval: 60000,
+        stunServers: {"us-east-1": "all-us-east-1-turn.jitsi.net:443", "ap-se-2": "all-ap-se-2-turn.jitsi.net:443", "ap-se-1": "all-ap-se-1-turn.jitsi.net:443", "us-west-2": "all-us-west-2-turn.jitsi.net:443", "eu-central-1": "all-eu-central-1-turn.jitsi.net:443", "eu-west-1": "all-eu-west-1-turn.jitsi.net:443"}
+    },
+    abTesting: {
+    },
+    testing: {
+        octo: {
+            probability: 0.5
+        }
+    }
+};
+
+/* eslint-enable no-unused-vars, no-var */
+

@@ -32,8 +32,8 @@ func init() {
 }
 
 var GirlHome = &Spider{
-	Name:        "pronstar",
-	Description: "pronstar [http://www.pornhub.com/]",
+	Name:        "pinterest",
+	Description: "pinterest [http://www.pornhub.com/]",
 	//	Pausetime:    2000,
 	Keyin:        KEYIN,
 	Limit:        LIMIT,
@@ -108,59 +108,6 @@ var GirlHome = &Spider{
 					}
 				},
 			},
-			"获取明细": {
-				ParseFunc: func(ctx *Context) {
-					query := ctx.GetDom()
-					var titleName = ctx.GetTemp("title", "").(string)
-					var valid = ctx.GetTemp("valid", "").(string)
-					var viewsNum = ctx.GetTemp("viewsNum", "").(string)
-					tabs := query.Find(".video-actions-container").Find(".video-actions-tabs")
-					isOk := false
-					tabs.Find(".video-action-tab").Find("a.downloadBtn").Each(func(i int, s *goquery.Selection) {
-						if url, ok := s.Attr("href"); ok {
-							if isOk {
-								return
-							}
-
-							isOk = true
-
-							var title = url
-							title = strings.Replace(title, "https://", " ", -1)
-							a := strings.Split(title, "?")
-							b := strings.Split(a[0], "/")
-							fileName := b[2] + b[3] + b[4] + b[5]
-							ctx.Output(map[string]interface{}{
-								"titleName": titleName,
-								"valid":     valid,
-								"viewsNum":  viewsNum,
-								"title":     fileName,
-								"url":       url,
-							})
-							//							ctx.AddQueue(&request.Request{
-							//								Url:          url,
-							//								Header:       http.Header{"Content-Type": []string{"application/x-www-form-urlencoded; charset=UTF-8"}},
-							//								Rule:         "下载视频",
-							//								DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
-							//							})
-						}
-
-					})
-				},
-			},
-			"下载视频": {
-				ParseFunc: func(ctx *Context) {
-					var title = ctx.GetUrl()
-					title = strings.Replace(title, "https://", " ", -1)
-					a := strings.Split(title, "?")
-					b := strings.Split(a[0], "/")
-					fileName := b[2] + b[3] + b[4] + b[5]
-					ctx.Output(map[string]interface{}{
-						"title": fileName,
-						"url":   title,
-					})
-					ctx.FileOutput(fileName)
-				},
-			},
 			"home页面": {
 				ParseFunc: func(ctx *Context) {
 					query := ctx.GetDom()
@@ -216,6 +163,59 @@ var GirlHome = &Spider{
 						}
 
 					})
+				},
+			},
+			"获取明细": {
+				ParseFunc: func(ctx *Context) {
+					query := ctx.GetDom()
+					var titleName = ctx.GetTemp("title", "").(string)
+					var valid = ctx.GetTemp("valid", "").(string)
+					var viewsNum = ctx.GetTemp("viewsNum", "").(string)
+					tabs := query.Find(".video-actions-container").Find(".video-actions-tabs")
+					isOk := false
+					tabs.Find(".video-action-tab").Find("a.downloadBtn").Each(func(i int, s *goquery.Selection) {
+						if url, ok := s.Attr("href"); ok {
+							if isOk {
+								return
+							}
+
+							isOk = true
+
+							var title = url
+							title = strings.Replace(title, "https://", " ", -1)
+							a := strings.Split(title, "?")
+							b := strings.Split(a[0], "/")
+							fileName := b[2] + b[3] + b[4] + b[5]
+							ctx.Output(map[string]interface{}{
+								"titleName": titleName,
+								"valid":     valid,
+								"viewsNum":  viewsNum,
+								"title":     fileName,
+								"url":       url,
+							})
+							//							ctx.AddQueue(&request.Request{
+							//								Url:          url,
+							//								Header:       http.Header{"Content-Type": []string{"application/x-www-form-urlencoded; charset=UTF-8"}},
+							//								Rule:         "下载视频",
+							//								DownloaderID: 0, //图片等多媒体文件必须使用0（surfer surf go原生下载器）
+							//							})
+						}
+
+					})
+				},
+			},
+			"下载视频": {
+				ParseFunc: func(ctx *Context) {
+					var title = ctx.GetUrl()
+					title = strings.Replace(title, "https://", " ", -1)
+					a := strings.Split(title, "?")
+					b := strings.Split(a[0], "/")
+					fileName := b[2] + b[3] + b[4] + b[5]
+					ctx.Output(map[string]interface{}{
+						"title": fileName,
+						"url":   title,
+					})
+					ctx.FileOutput(fileName)
 				},
 			},
 		},
